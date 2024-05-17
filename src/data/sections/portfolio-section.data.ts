@@ -43,6 +43,10 @@ const portfolioSectionData = {
                     src: import("@/assets/portfolio/bubblescreenshot2.png"),
                     alt: "Second screenshot",
                 },
+                {
+                    src: import("@/assets/portfolio/toi.jpg"),
+                    alt: "Third screenshot",
+                },
             ],
             description: `
         - Built a REST API to recommend news articles having an opposing viewpoint on the same topic as the current article. 

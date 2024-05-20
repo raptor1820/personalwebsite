@@ -77,7 +77,7 @@ const portfolioSectionData = {
       - Developed a web app that helps users track medical reports and extracts actionable insights using OCR.
       - Won First place at ShriTeq 2022 Hackathon.
       - Invited by Tata1Mg to present the project to their team.
-      - Recognized as Young Changemakers at the Global Bio India summit 2023, hosted by the Dept. of Biotechnology, Govt. of India.`,
+      - Recognized as Young Changemakers at the Global Bio India Summit 2023, hosted by the Dept. of Biotechnology, Govt. of India.`,
             tagsList: {
                 title: "Technologies",
                 tags: [react(), tailwindCss(), express(), mongoDb(), node()],

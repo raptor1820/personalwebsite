@@ -28,7 +28,7 @@ const educationSectionData = {
             links: [
                 website({
                     name: "Scores",
-                    url: "https://https://drive.google.com/drive/folders/1fHQ0E7KBysXyoVibBVq_CAyFzyHS7JoV?usp=sharing",
+                    url: "https://drive.google.com/drive/folders/1fHQ0E7KBysXyoVibBVq_CAyFzyHS7JoV?usp=sharing",
                 }),
             ],
         },

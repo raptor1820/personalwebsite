@@ -10,14 +10,14 @@ const educationSectionData = {
         visible: true,
     },
     diplomas: [
-        {
-            title: "BS in Computer Science",
-            institution: "Georgia Institute of Technology",
-            image: import("@/assets/logos/gatech.png"),
-            dates: [new Date("2024.8"), new Date("2028.08")],
-            description: "",
-            links: [],
-        },
+        // {
+        //     title: "BS in Computer Science",
+        //     institution: "Georgia Institute of Technology",
+        //     image: import("@/assets/logos/gatech.png"),
+        //     dates: [new Date("2024.8"), new Date("2028.08")],
+        //     description: "",
+        //     links: [],
+        // },
         {
             title: "ICSE and ISC",
             institution: "The Shri Ram School, Moulsari",

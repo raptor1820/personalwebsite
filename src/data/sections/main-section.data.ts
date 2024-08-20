@@ -44,7 +44,7 @@ const mainSectionData = {
             fullRow: true,
         },
     ],
-    description: `Hi! I am Ritwic, an incoming Computer Science student at Georgia Tech. I love to build things and learn new technologies. I am always looking for opportunities to grow and learn. I love watching football (soccer), playing video games and reading books. Feel free to reach out to me!`,
+    description: `Hi! I am Ritwic, a Computer Science major at Georgia Tech. I love to build things and learn new technologies. I am always looking for opportunities to grow and learn. I love watching football (soccer), playing video games and reading books. Feel free to reach out to me!`,
     tags: [],
     // action: {
     //   label: 'Download CV',

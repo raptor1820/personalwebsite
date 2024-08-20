@@ -87,7 +87,7 @@ const portfolioSectionData = {
         {
             name: "Email.ext",
             image: import("@/assets/portfolio/emailext.png"),
-            dates: [new Date("2018-01"), new Date("2020-12")],
+            dates: [new Date("2023-01"), new Date("2023-01")],
             details: [
                 { label: "Team size", value: "3 people" },
                 { label: "My role", value: ["Back-end Developer", "Designer"] },

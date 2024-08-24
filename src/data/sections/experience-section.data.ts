@@ -29,7 +29,7 @@ const experienceSectionData = {
       image: import('@/assets/logos/amarii.png'),
       dates: [new Date('2022-06'), new Date('2023-10')],
       description: `
-        - Developed an inventory management portal that intracted with the Squarespace API to directly push products to the storefront. 
+        - Developed an inventory management portal that interacted with the Squarespace API to directly push products to the storefront. 
         - Value of artwork processed: ~10k USD
       `,
       tagsList: {

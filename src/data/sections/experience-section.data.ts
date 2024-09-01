@@ -17,7 +17,7 @@ import {
 
 const experienceSectionData = {
   config: {
-    title: 'Work experience',
+    title: 'Experience',
     slug: 'experience',
     icon: 'fa6-solid:suitcase',
     visible: true,

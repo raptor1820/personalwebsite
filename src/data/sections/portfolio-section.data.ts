@@ -12,6 +12,8 @@ import {
     mongoDb,
     node,
     openai,
+    astro,
+    llm,
 } from "../helpers/skills";
 
 const portfolioSectionData = {
@@ -26,6 +28,38 @@ const portfolioSectionData = {
         },
     },
     projects: [
+        {
+            name: "MedEase: AI-Assisted Diagnostic Workflow",
+            dates: [new Date("2024-09"), new Date("2024-09")],
+            details: [
+                { label: "My role", value: ["Team member"] },
+                { label: "Category", value: ["Web app"] },
+            ],
+            description: `
+        - Developed a web app designed to streamline the documentation process for doctors and nurses, letting them focus more on patient care.
+        - Used RAG LLMs to generate summaries of patient reports and suggest diagnoses.
+        - Stored vector embeddings for the RAG LLMs in a MongoDB database.
+        - Won 'Best Overall Implementation of MongoDB at HackGT 11.`,
+            tagsList: {
+                title: "Technologies",
+                tags: [
+                    mongoDb(),
+                    flask(),
+                    astro(),
+                    openai(),
+                    llm(),
+                    tailwindCss(),
+                ],
+            },
+            links: [
+                github({
+                    url: "https://github.com/1129Chengyuan/EMR-Automatic/",
+                }),
+                website({
+                    url: "https://devpost.com/software/medease-ai-assisted-diagnostic-workflow",
+                }),
+            ],
+        },
         {
             name: "Bubble Burst!",
             image: import("@/assets/portfolio/bubblelogo.png"),

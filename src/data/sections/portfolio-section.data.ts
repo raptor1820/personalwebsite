@@ -14,6 +14,7 @@ import {
     openai,
     astro,
     llm,
+    typescript,
 } from "../helpers/skills";
 
 const portfolioSectionData = {
@@ -28,6 +29,26 @@ const portfolioSectionData = {
         },
     },
     projects: [
+        {
+            name: "ValuAI",
+            dates: [new Date("2025-02"), new Date("2025-02")],
+            details: [
+                { label: "My role", value: ["Full-stack Developer"] },
+                { label: "Category", value: ["Web app"] },
+            ],
+            description: `
+        - Built a React + TypeScript + Tailwind frontend integrated with a Flask backend for real-time claim validation.
+        - Developed multimodal AI verification using Gemini Flash 2.0 & Llama 3 for fraud detection in insurance claims.
+        - Ensured seamless UI/UX for insurers & homeowners, reducing claim verification time significantly.`,
+            tagsList: {
+                title: "Technologies",
+                tags: [react(), typescript(), tailwindCss(), flask()],
+            },
+            links: [
+                github({ url: "https://github.com/adityasht/hacklytics25" }),
+                website({ url: "https://devpost.com/software/valuai" }),
+            ],
+        },
         {
             name: "MedEase: AI-Assisted Diagnostic Workflow",
             dates: [new Date("2024-09"), new Date("2024-09")],

@@ -13,7 +13,7 @@ const educationSectionData = {
         {
             title: "BS in Computer Science",
             institution: "Georgia Institute of Technology",
-            image: import("@/assets/logos/gatech.png"),
+            image: import("@/assets/logos/gatec.png"),
             dates: [new Date("2024.8"), new Date("2028.08")],
             description: "",
             links: [],

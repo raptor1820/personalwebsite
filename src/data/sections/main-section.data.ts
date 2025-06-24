@@ -18,7 +18,7 @@ const mainSectionData = {
             value: "ritwicverma@gmail.com",
             url: "mailto:ritwicverma@gmail.com",
         },
-        { label: "From", value: "New Delhi, India" },
+        { label: "From", value: "Atlanta, GA" },
         // {
         //   label: 'Currently Listennig to:',
         //   value: 'The Weeknd',

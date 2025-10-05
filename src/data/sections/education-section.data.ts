@@ -15,7 +15,8 @@ const educationSectionData = {
             institution: "Georgia Institute of Technology",
             image: import("@/assets/logos/gatec.png"),
             dates: [new Date("2024.8"), new Date("2028.08")],
-            description: "",
+            description:
+                "Relevant Coursework: Design and Analysis of Algorithms, Data Structure and Algorithms, Object-Oriented Programming, Computer Organization, Discrete Mathematics",
             links: [],
         },
         {

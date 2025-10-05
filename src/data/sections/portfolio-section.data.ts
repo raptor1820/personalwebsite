@@ -15,6 +15,10 @@ import {
     astro,
     llm,
     typescript,
+    nextJs,
+    python,
+    supabase,
+    gemini,
 } from "../helpers/skills";
 
 const portfolioSectionData = {
@@ -30,23 +34,27 @@ const portfolioSectionData = {
     },
     projects: [
         {
-            name: "ValuAI",
+            name: "ripenv - Git-safe encrypted secrets managers",
             dates: [new Date("2025-02"), new Date("2025-02")],
-            details: [
-                { label: "My role", value: ["Full-stack Developer"] },
-                { label: "Category", value: ["Web app"] },
-            ],
+            details: [],
             description: `
-        - Built a React + TypeScript + Tailwind frontend integrated with a Flask backend for real-time claim validation.
-        - Developed multimodal AI verification using Gemini Flash 2.0 & Llama 3 for fraud detection in insurance claims.
-        - Ensured seamless UI/UX for insurers & homeowners, reducing claim verification time significantly.`,
+        - Engineered a developer tool that protects secrets (like API keys) using a public-key cryptography system, making them safe to commit while maintaining integrity across machines and CI pipelines.
+        - Built a PyNaCl, Argon2id, Click and Rich powered CLI along with a Next.js + TypeScript dashboard powered by WebCrypto, Supabase Auth, Tailwind, and PostgreSQL to implement client-side encryption and efficient key rotation.
+        - Performs all encryption on-device so plaintext secrets never touch servers, helping teams securely store, rotate, and share secrets while reducing the risk of leaks and streamlining onboarding and deployments.`,
             tagsList: {
                 title: "Technologies",
-                tags: [react(), typescript(), tailwindCss(), flask()],
+                tags: [
+                    typescript(),
+                    tailwindCss(),
+                    python(),
+                    nextJs(),
+                    gemini(),
+                    supabase(),
+                ],
             },
             links: [
-                github({ url: "https://github.com/adityasht/hacklytics25" }),
-                website({ url: "https://devpost.com/software/valuai" }),
+                github({ url: "https://github.com/raptor1820/ripenv" }),
+                website({ url: "https://devpost.com/software/ripenv" }),
             ],
         },
         {
@@ -57,10 +65,9 @@ const portfolioSectionData = {
                 { label: "Category", value: ["Web app"] },
             ],
             description: `
-        - Developed a web app designed to streamline the documentation process for doctors and nurses, letting them focus more on patient care.
-        - Used RAG LLMs to generate summaries of patient reports and suggest diagnoses.
-        - Stored vector embeddings for the RAG LLMs in a MongoDB database.
-        - Won 'Best Overall Implementation of MongoDB at HackGT 11.`,
+        - Built a doctor facing AI assistant using Retrieval-Augmented Generation (RAG) with LLMs, delivering context-aware medical insights, with ∼ 5s latency, and reducing time spent researching complex queries by 70%.
+        - Engineered scalable retrieval pipelines with MongoDB Atlas Vector Search, ensuring reliable access to large volumes of medical data
+        - Awarded “Best Overall Implementation of MongoDB” out of 150+ projects at HackGT 11, recognizing technical innovation and execution.`,
             tagsList: {
                 title: "Technologies",
                 tags: [
@@ -104,9 +111,9 @@ const portfolioSectionData = {
                 },
             ],
             description: `
-        - Built a REST API to recommend news articles having an opposing viewpoint on the same topic as the current article. 
-        - Implemented on the frontend in the form of a Chrome extension and a website.
-        - Featured in the Times of India. `,
+        - Created a web app and a ManifestV3 Chrome extension that delivered counterpoint perspectives on news articles, helping users reduce confirmation bias, reaching 500+ early users during pilot testing.
+        - Engineered an AI-driven pipeline that scraped content, generated targeted queries, and surfaced diverse sources, producing counterpoint recommendations with a 30% higher diversity score than baseline Google searches
+        - Featured in the Times of India (audience of 10M+ readers), boosting project visibility and sparking discussions on balanced media consumption.`,
             tagsList: {
                 title: "Technologies",
                 tags: [flask(), html(), css(), javascript()],
@@ -120,42 +127,62 @@ const portfolioSectionData = {
             ],
         },
         {
-            name: "CortX",
-            image: import("@/assets/portfolio/cortxlogo.png"),
-            dates: [new Date("2022-08"), null],
+            name: "ValuAI",
+            dates: [new Date("2025-02"), new Date("2025-02")],
             details: [
-                { label: "Team size", value: "5 people" },
-                { label: "My role", value: ["Back-end Developer"] },
+                { label: "My role", value: ["Full-stack Developer"] },
                 { label: "Category", value: ["Web app"] },
             ],
             description: `
-      - Developed a web app that helps users track medical reports and extracts actionable insights using OCR.
-      - Won First place at ShriTeq 2022 Hackathon.
-      - Invited by Tata1Mg to present the project to their team.
-      - Recognized as Young Changemakers at the Global Bio India Summit 2023, hosted by the Dept. of Biotechnology, Govt. of India.`,
+        - Built a React + TypeScript + Tailwind frontend integrated with a Flask backend for real-time claim validation.
+        - Developed multimodal AI verification using Gemini Flash 2.0 & Llama 3 for fraud detection in insurance claims.
+        - Ensured seamless UI/UX for insurers & homeowners, reducing claim verification time significantly.`,
             tagsList: {
                 title: "Technologies",
-                tags: [react(), tailwindCss(), express(), mongoDb(), node()],
+                tags: [react(), typescript(), tailwindCss(), flask()],
             },
-            links: [github({ url: "https://github.com/tsrsmict/CortX" })],
-        },
-        {
-            name: "Email.ext",
-            image: import("@/assets/portfolio/emailext.png"),
-            dates: [new Date("2023-01"), new Date("2023-01")],
-            details: [
-                { label: "Team size", value: "3 people" },
-                { label: "My role", value: ["Back-end Developer", "Designer"] },
-                { label: "Category", value: ["Chrome extension"] },
+            links: [
+                github({ url: "https://github.com/adityasht/hacklytics25" }),
+                website({ url: "https://devpost.com/software/valuai" }),
             ],
-            description:
-                "Developed a Chrome extension that uses NLP to summarize emails and suggest replies.",
-            tagsList: {
-                title: "Technologies",
-                tags: [flask(), react(), openai()],
-            },
-            links: [github({ url: "https://github.com/tsrsmict/email.ext" })],
         },
+        //     {
+        //         name: "CortX",
+        //         image: import("@/assets/portfolio/cortxlogo.png"),
+        //         dates: [new Date("2022-08"), null],
+        //         details: [
+        //             { label: "Team size", value: "5 people" },
+        //             { label: "My role", value: ["Back-end Developer"] },
+        //             { label: "Category", value: ["Web app"] },
+        //         ],
+        //         description: `
+        //   - Developed a web app that helps users track medical reports and extracts actionable insights using OCR.
+        //   - Won First place at ShriTeq 2022 Hackathon.
+        //   - Invited by Tata1Mg to present the project to their team.
+        //   - Recognized as Young Changemakers at the Global Bio India Summit 2023, hosted by the Dept. of Biotechnology, Govt. of India.`,
+        //         tagsList: {
+        //             title: "Technologies",
+        //             tags: [react(), tailwindCss(), express(), mongoDb(), node()],
+        //         },
+        //         links: [github({ url: "https://github.com/tsrsmict/CortX" })],
+        //     },
+        //     {
+        //         name: "Email.ext",
+        //         image: import("@/assets/portfolio/emailext.png"),
+        //         dates: [new Date("2023-01"), new Date("2023-01")],
+        //         details: [
+        //             { label: "Team size", value: "3 people" },
+        //             { label: "My role", value: ["Back-end Developer", "Designer"] },
+        //             { label: "Category", value: ["Chrome extension"] },
+        //         ],
+        //         description:
+        //             "Developed a Chrome extension that uses NLP to summarize emails and suggest replies.",
+        //         tagsList: {
+        //             title: "Technologies",
+        //             tags: [flask(), react(), openai()],
+        //         },
+        //         links: [github({ url: "https://github.com/tsrsmict/email.ext" })],
+        //     },
     ],
 } as const satisfies ReadonlyDeep<PortfolioSection>;
 

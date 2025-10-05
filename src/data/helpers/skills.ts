@@ -267,3 +267,17 @@ export const llm = createSkillFactory({
     iconColor: "#000000",
     url: "https://openai.com/",
 });
+
+export const gcp = createSkillFactory({
+    name: "Google Cloud Platform",
+    icon: "simple-icons:googlecloud",
+    iconColor: "#4285F4",
+    url: "https://cloud.google.com/",
+});
+
+export const gemini = createSkillFactory({
+    name: "Gemini",
+    icon: "simple-icons:google",
+    iconColor: "#4285F4",
+    url: "https://gemini.google/",
+});

@@ -1,36 +1,235 @@
 ---
-import Layout from "@/web/components/layout.astro";
-import Sidebar from "@/web/components/sidebar.astro";
-import ThemeToggle from "@/web/components/theme-toggle.astro";
-import MainSection from "@/web/sections/main/main-section.web.astro";
-import SkillsSection from "@/web/sections/skills/skills-section.web.astro";
-import ExperienceSection from "@/web/sections/experience/experience-section.web.astro";
-import PortfolioSection from "@/web/sections/portfolio/portfolio-section.web.astro";
-import EducationSection from "@/web/sections/education/education-section.web.astro";
-import TestimonialsSection from "@/web/sections/testimonials/testimonials-section.web.astro";
-import FavoritesSection from "@/web/sections/favorites/favorites-section.web.astro";
-import cv, { hideSection } from "@/data";
-import { hide } from "@floating-ui/dom";
+import "../styles/global.css";
 
-const { config, sections } = cv(
-    hideSection("testimonials"),
-    hideSection("favorites"),
-    hideSection("skills")
-);
+const currently = [
+  { text: "Incoming SDE intern @ AWS Bedrock AgentCore", href: "https://aws.amazon.com/bedrock/" },
+  { text: "CS @ Georgia Tech, GPA 3.94", href: "https://www.gatech.edu/" },
+  { text: "AI infrastructure @ GT Makerspace / NVIDIA", href: "https://aimakerspace.gatech.edu/" },
+  { text: "TA @ CS 3510 Algorithms", href: "https://catalog.gatech.edu/courses-undergrad/cs/" }
+];
+
+const focus = [
+  { text: "H100 model serving, reliability metrics, and monitoring" },
+  { text: "Algorithms teaching, quiz design, and C++ problem solving" },
+  { text: "Agent infrastructure with clean latency and observability paths" }
+];
+
+const recently = [
+  { text: "Optimized distributed GPU serving workflows" },
+  { text: "Mentored 100+ students across algorithms recitations" }
+];
+
+const summary = [
+  "systems-minded CS student at Georgia Tech",
+  "building AI infrastructure for reliable agent workflows",
+  "comfortable close to the metal: C++, Linux, CUDA, telemetry"
+];
+
+const links = [
+  { label: "github", href: "https://github.com/raptor1820" },
+  { label: "linkedin", href: "https://linkedin.com/in/ritwicverma" },
+  { label: "email", href: "mailto:ritwicverma@gmail.com" }
+];
 ---
 
-<Layout {...config} sections={sections}>
-    <ThemeToggle />
-    <main
-        class="w-full max-w-5xl space-y-4 px-2 py-3 sm:space-y-6 sm:px-8 sm:py-12 lg:space-y-8 lg:py-20">
-        <MainSection {...sections.main} />
-        <SkillsSection {...sections.skills} />
-        <ExperienceSection {...sections.experience} />
-        <PortfolioSection {...sections.portfolio} />
-        <EducationSection {...sections.education} />
-        <TestimonialsSection {...sections.testimonials} />
-        <FavoritesSection {...sections.favorites} />
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="Ritwic Verma is a computer science student at Georgia Tech building developer tools, civic software, and practical AI systems."
+    />
+    <meta name="theme-color" content="#fff6e8" />
+    <meta property="og:title" content="Ritwic Verma" />
+    <meta
+      property="og:description"
+      content="Computer science student at Georgia Tech building useful software systems."
+    />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://ritwic.com" />
+    <title>Ritwic Verma</title>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  </head>
+  <body>
+    <canvas class="field" id="field" aria-hidden="true"></canvas>
+    <a class="skip-link" href="#content">Skip to content</a>
+    <div class="site-cursor" id="site-cursor" aria-hidden="true">
+      <span class="site-cursor-dot"></span>
+    </div>
+
+    <main class="page" id="content">
+      <section class="home-card" aria-labelledby="intro-title">
+        <header class="masthead">
+          <nav class="nav" aria-label="Primary links">
+            {links.map((link) => <a href={link.href} rel="noreferrer"><span class="link-text">{link.label}</span></a>)}
+          </nav>
+        </header>
+
+        <div class="content-grid">
+          <div class="intro">
+            <h1 id="intro-title" class="hero-name" data-text="Ritwic Verma">
+              Ritwic Verma<span class="cursor" aria-hidden="true"></span>
+            </h1>
+            <p class="role-line">Computer Science Student, Systems + AI Infra</p>
+            <ul class="summary-list" aria-label="Summary">
+              {summary.map((item) => <li>{item}</li>)}
+            </ul>
+          </div>
+
+          <div class="lists" aria-label="Status lists">
+            <section class="list-block" aria-labelledby="currently-heading">
+              <h2 id="currently-heading">Currently:</h2>
+              <ul>
+                {
+                  currently.map((item) => (
+                    <li>
+                      <span class="arrow" aria-hidden="true">↳</span>
+                      <a href={item.href} rel="noreferrer">
+                        <span class="link-text">{item.text}</span>
+                      </a>
+                    </li>
+                  ))
+                }
+              </ul>
+            </section>
+
+            <section class="list-block" aria-labelledby="building-heading">
+              <h2 id="building-heading">Focus:</h2>
+              <ul>
+                {
+                  focus.map((item) => (
+                    <li>
+                      <span class="arrow" aria-hidden="true">↳</span>
+                      <span class="plain-row">
+                        <strong>{item.text}</strong>
+                      </span>
+                    </li>
+                  ))
+                }
+              </ul>
+            </section>
+
+            <section class="list-block" aria-labelledby="recently-heading">
+              <h2 id="recently-heading">Recently:</h2>
+              <ul>
+                {
+                  recently.map((item) => (
+                    <li>
+                      <span class="arrow" aria-hidden="true">↳</span>
+                      <span class="plain-row">
+                        <span>{item.text}</span>
+                      </span>
+                    </li>
+                  ))
+                }
+              </ul>
+            </section>
+          </div>
+        </div>
+      </section>
     </main>
-    <Sidebar sections={sections} className="sticky top-8 mt-20" />
-    <script src="../web/scripts/initialize-tooltips.ts"></script>
-</Layout>
+
+    <script is:inline>
+      (() => {
+        const canvas = document.getElementById("field");
+        const siteCursor = document.getElementById("site-cursor");
+        const context = canvas?.getContext("2d", { alpha: true });
+        const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+        const pointer = {
+          overTextLink: false
+        };
+
+        const linkSelector = "a[href]";
+        const linkTextSelector = ".link-text";
+
+        const setCursorMode = (target) => {
+          const text = target instanceof Element ? target.closest(linkTextSelector) : null;
+          const link = text?.closest(linkSelector) ?? null;
+          pointer.overTextLink = Boolean(link);
+          siteCursor?.classList.toggle("is-link", pointer.overTextLink);
+        };
+
+        const movePointer = (event) => {
+          if (siteCursor) {
+            siteCursor.style.left = `${event.clientX}px`;
+            siteCursor.style.top = `${event.clientY}px`;
+            siteCursor.classList.add("is-visible");
+            setCursorMode(event.target);
+          }
+        };
+
+        window.addEventListener("pointermove", movePointer, { passive: true });
+        window.addEventListener("pointerover", (event) => setCursorMode(event.target), { passive: true });
+        window.addEventListener("pointerleave", () => {
+          siteCursor?.classList.remove("is-visible");
+          siteCursor?.classList.remove("is-link");
+          pointer.overTextLink = false;
+        }, { passive: true });
+
+        if (!canvas || !context || reduceMotion) return;
+
+        const points = Array.from({ length: 135 }, (_, index) => ({
+          x: Math.random(),
+          y: Math.random(),
+          phase: index * 0.73,
+          speed: 0.00022 + (index % 5) * 0.00003
+        }));
+
+        const resize = () => {
+          const scale = Math.min(window.devicePixelRatio || 1, 2);
+          canvas.width = Math.floor(window.innerWidth * scale);
+          canvas.height = Math.floor(window.innerHeight * scale);
+          canvas.style.width = `${window.innerWidth}px`;
+          canvas.style.height = `${window.innerHeight}px`;
+          context.setTransform(scale, 0, 0, scale, 0, 0);
+        };
+
+        const draw = (time) => {
+          const width = window.innerWidth;
+          const height = window.innerHeight;
+          const accentRgb = getComputedStyle(document.body).getPropertyValue("--accent-rgb").trim() || "232, 111, 0";
+          const particleRgb = getComputedStyle(document.body).getPropertyValue("--particle-rgb").trim() || "83, 48, 14";
+          context.clearRect(0, 0, width, height);
+
+          const resolved = points.map((point) => {
+            const px = point.x * width + Math.cos(time * point.speed + point.phase) * 18;
+            const py = point.y * height + Math.sin(time * point.speed * 1.4 + point.phase) * 14;
+            return { x: px, y: py };
+          });
+
+          for (let i = 0; i < resolved.length; i += 1) {
+            for (let j = i + 1; j < resolved.length; j += 1) {
+              const a = resolved[i];
+              const b = resolved[j];
+              const distance = Math.hypot(a.x - b.x, a.y - b.y);
+              if (distance < 132) {
+                context.beginPath();
+                context.moveTo(a.x, a.y);
+                context.lineTo(b.x, b.y);
+                context.strokeStyle = `rgba(${accentRgb}, ${0.22 * (1 - distance / 132)})`;
+                context.lineWidth = 0.95;
+                context.stroke();
+              }
+            }
+          }
+
+          for (const point of resolved) {
+            context.beginPath();
+            context.arc(point.x, point.y, 1.65, 0, Math.PI * 2);
+            context.fillStyle = `rgba(${particleRgb}, 0.58)`;
+            context.fill();
+          }
+
+          window.requestAnimationFrame(draw);
+        };
+
+        window.addEventListener("resize", resize);
+        resize();
+        window.requestAnimationFrame(draw);
+      })();
+    </script>
+  </body>
+</html>

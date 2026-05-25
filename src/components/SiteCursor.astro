@@ -1,0 +1,35 @@
+<div class="site-cursor" id="site-cursor" aria-hidden="true">
+  <span class="site-cursor-dot"></span>
+</div>
+
+<script is:inline>
+  (() => {
+    const siteCursor = document.getElementById("site-cursor");
+    if (!siteCursor) return;
+
+    const interactiveSelector = "a[href], button, [role='button'], [tabindex]:not([tabindex='-1'])";
+
+    const setCursorMode = (target) => {
+      const interactive = target instanceof Element ? target.closest(interactiveSelector) : null;
+      siteCursor.classList.toggle("is-link", Boolean(interactive));
+    };
+
+    const movePointer = (event) => {
+      siteCursor.style.left = `${event.clientX}px`;
+      siteCursor.style.top = `${event.clientY}px`;
+      siteCursor.classList.add("is-visible");
+      setCursorMode(event.target);
+    };
+
+    window.addEventListener("pointermove", movePointer, { passive: true });
+    window.addEventListener("pointerover", (event) => setCursorMode(event.target), { passive: true });
+    window.addEventListener(
+      "pointerleave",
+      () => {
+        siteCursor.classList.remove("is-visible");
+        siteCursor.classList.remove("is-link");
+      },
+      { passive: true }
+    );
+  })();
+</script>

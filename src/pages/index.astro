@@ -1,36 +1,158 @@
 ---
-import Layout from "@/web/components/layout.astro";
-import Sidebar from "@/web/components/sidebar.astro";
-import ThemeToggle from "@/web/components/theme-toggle.astro";
-import MainSection from "@/web/sections/main/main-section.web.astro";
-import SkillsSection from "@/web/sections/skills/skills-section.web.astro";
-import ExperienceSection from "@/web/sections/experience/experience-section.web.astro";
-import PortfolioSection from "@/web/sections/portfolio/portfolio-section.web.astro";
-import EducationSection from "@/web/sections/education/education-section.web.astro";
-import TestimonialsSection from "@/web/sections/testimonials/testimonials-section.web.astro";
-import FavoritesSection from "@/web/sections/favorites/favorites-section.web.astro";
-import cv, { hideSection } from "@/data";
-import { hide } from "@floating-ui/dom";
+import "../styles/global.css";
+import SiteCursor from "../components/SiteCursor.astro";
+import SiteSnake from "../components/SiteSnake.astro";
 
-const { config, sections } = cv(
-    hideSection("testimonials"),
-    hideSection("favorites"),
-    hideSection("skills")
-);
+const summary = [
+  "i build AI systems that go into production",
+  "working across agents, backend and full stack systems"
+];
+
+const currently = [
+  {
+    text: "SDE Intern @ AWS Bedrock AgentCore",
+    href: "https://aws.amazon.com/bedrock/agentcore/"
+  },
+  {
+    text: "CS @ Georgia Tech: Intelligence and Info Internetworks",
+    href: "https://www.gatech.edu/"
+  },
+  {
+    text: "AI Infra Engineer @ AI Makerspace by NVIDIA",
+    href: "https://alregib.ece.gatech.edu/ai-makerspace/"
+  },
+  {
+    text: "TA for CS 3510: Design & Analysis of Algorithms",
+    href: "https://faculty.cc.gatech.edu/~ladha/S26/3510/"
+  }
+];
+
+const focus = [
+  { text: "agentic workflows with tools, memory, routing, and evals" },
+  { text: "infra for serving agents and models reliably on cloud and GPU clusters" },
+  { text: "backend, full-stack, and low-latency systems" }
+];
+
+const recently = [
+  { text: "working on secure agent handoff infrastructure at AWS" },
+  { text: "built agentic AI workflows on NVIDIA H100 clusters with full observability" },
+  { text: "full stack dev for GT Scheduler (30k+ users)", href: "https://www.gt-scheduler.org/" },
+  { text: "built autonomous multi-agent systems across finance, medicine, and education" },
+  { text: "taught algorithms to 500+ students as a TA" },
+  { text: "remembered to play some snake :)" }
+];
+
+const links = [
+  { label: "github", href: "https://github.com/raptor1820" },
+  { label: "linkedin", href: "https://linkedin.com/in/ritwicverma" },
+  { label: "email", href: "mailto:ritwicverma@gmail.com" }
+];
 ---
 
-<Layout {...config} sections={sections}>
-    <ThemeToggle />
-    <main
-        class="w-full max-w-5xl space-y-4 px-2 py-3 sm:space-y-6 sm:px-8 sm:py-12 lg:space-y-8 lg:py-20">
-        <MainSection {...sections.main} />
-        <SkillsSection {...sections.skills} />
-        <ExperienceSection {...sections.experience} />
-        <PortfolioSection {...sections.portfolio} />
-        <EducationSection {...sections.education} />
-        <TestimonialsSection {...sections.testimonials} />
-        <FavoritesSection {...sections.favorites} />
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="Ritwic Verma is a computer science student at Georgia Tech building developer tools, civic software, and practical AI systems."
+    />
+    <meta name="theme-color" content="#fff6e8" />
+    <meta property="og:title" content="Ritwic Verma" />
+    <meta
+      property="og:description"
+      content="Computer science student at Georgia Tech building useful software systems."
+    />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://ritwic.com" />
+    <title>Ritwic Verma</title>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  </head>
+  <body>
+    <a class="skip-link" href="#content">Skip to content</a>
+    <SiteCursor />
+
+    <main class="page" id="content">
+      <section class="home-card" aria-labelledby="intro-title">
+        <header class="masthead">
+          <nav class="nav" aria-label="Primary links">
+            {links.map((link) => <a href={link.href} target="_blank" rel="noopener noreferrer"><span class="link-text">{link.label}</span></a>)}
+            <button id="site-snake-launch" type="button" aria-label="Play snake on this page">snake</button>
+          </nav>
+        </header>
+
+        <div class="content-grid">
+          <div class="intro">
+            <h1 id="intro-title" class="hero-name" data-text="Ritwic Verma">Ritwic Verma</h1>
+            <!-- <p class="role-line">cs major, builder, engineer</p> -->
+            <ul class="summary-list" aria-label="Summary">
+              {summary.map((item) => <li>{item}</li>)}
+            </ul>
+          </div>
+
+          <div class="lists" aria-label="Status lists">
+            <section class="list-block" aria-labelledby="currently-heading">
+              <h2 id="currently-heading">Currently:</h2>
+              <ul>
+                {
+                  currently.map((item) => (
+                    <li>
+                      <span class="arrow" aria-hidden="true">↳</span>
+                      <a href={item.href} target="_blank" rel="noopener noreferrer">
+                        <span class="link-text">{item.text}</span>
+                      </a>
+                    </li>
+                  ))
+                }
+              </ul>
+            </section>
+
+            <section class="list-block" aria-labelledby="building-heading">
+              <h2 id="building-heading">Focus:</h2>
+              <ul>
+                {
+                  focus.map((item) => (
+                    <li>
+                      <span class="arrow" aria-hidden="true">↳</span>
+                      <span class="plain-row">
+                        <strong>{item.text}</strong>
+                      </span>
+                    </li>
+                  ))
+                }
+              </ul>
+            </section>
+
+            <section class="list-block" aria-labelledby="recently-heading">
+              <h2 id="recently-heading">Recently:</h2>
+              <ul>
+                {
+                  recently.map((item) => (
+                    <li>
+                      <span class="arrow" aria-hidden="true">↳</span>
+                      {
+                        item.href ? (
+                          <a href={item.href} target="_blank" rel="noopener noreferrer">
+                            <span class="link-text">{item.text}</span>
+                          </a>
+                        ) : (
+                          <span class="plain-row">
+                            <span>{item.text}</span>
+                          </span>
+                        )
+                      }
+                    </li>
+                  ))
+                }
+              </ul>
+            </section>
+          </div>
+        </div>
+      </section>
     </main>
-    <Sidebar sections={sections} className="sticky top-8 mt-20" />
-    <script src="../web/scripts/initialize-tooltips.ts"></script>
-</Layout>
+
+    <SiteSnake />
+
+  </body>
+</html>

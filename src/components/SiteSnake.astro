@@ -1,0 +1,546 @@
+<div class="site-snake-layer" id="site-snake-layer" aria-hidden="true">
+  <canvas id="site-snake-canvas" aria-hidden="true"></canvas>
+
+  <div class="site-snake-hud" role="status" aria-live="polite">
+    <span class="site-snake-label">snake mode</span>
+    <span>score <output id="site-snake-score">000</output></span>
+    <span>best <output id="site-snake-best">000</output></span>
+    <button id="site-snake-exit" type="button">exit</button>
+  </div>
+
+  <div class="site-snake-pad" aria-label="Snake direction controls">
+    <button type="button" data-site-snake-dir="up" aria-label="Move up">↑</button>
+    <button type="button" data-site-snake-dir="left" aria-label="Move left">←</button>
+    <button type="button" data-site-snake-dir="down" aria-label="Move down">↓</button>
+    <button type="button" data-site-snake-dir="right" aria-label="Move right">→</button>
+  </div>
+</div>
+
+<script>
+  import { layoutWithLines, measureNaturalWidth, prepareWithSegments } from "@chenglou/pretext";
+
+  const launchButton = document.getElementById("site-snake-launch");
+  const layer = document.getElementById("site-snake-layer");
+  const canvas = document.getElementById("site-snake-canvas");
+  const exitButton = document.getElementById("site-snake-exit");
+  const scoreOutput = document.getElementById("site-snake-score");
+  const bestOutput = document.getElementById("site-snake-best");
+  const directionButtons = document.querySelectorAll("[data-site-snake-dir]");
+
+  if (
+    launchButton instanceof HTMLButtonElement &&
+    layer instanceof HTMLElement &&
+    canvas instanceof HTMLCanvasElement &&
+    exitButton instanceof HTMLButtonElement &&
+    scoreOutput instanceof HTMLOutputElement &&
+    bestOutput instanceof HTMLOutputElement
+  ) {
+    const ctx = canvas.getContext("2d");
+
+    if (ctx) {
+      const FONT_STACK = "'Cascadia Mono', 'JetBrains Mono', 'Fira Code', 'IBM Plex Mono', Consolas, monospace";
+      const TERRAIN_SELECTOR = [
+        ".nav",
+        ".nav a",
+        ".nav button",
+        ".hero-name",
+        ".role-line",
+        ".summary-list li",
+        ".list-block h2",
+        ".list-block li"
+      ].join(",");
+      const DIRS = {
+        up: { x: 0, y: -1 },
+        down: { x: 0, y: 1 },
+        left: { x: -1, y: 0 },
+        right: { x: 1, y: 0 }
+      };
+      const KEY_DIRS = new Map([
+        ["arrowup", DIRS.up],
+        ["w", DIRS.up],
+        ["arrowdown", DIRS.down],
+        ["s", DIRS.down],
+        ["arrowleft", DIRS.left],
+        ["a", DIRS.left],
+        ["arrowright", DIRS.right],
+        ["d", DIRS.right]
+      ]);
+
+      let active = false;
+      let running = false;
+      let restoring = false;
+      let loopTimer = 0;
+      let tickMs = 122;
+      let score = 0;
+      let best = Number(window.localStorage.getItem("ritwic-site-snake-best") || 0);
+      let pixelRatio = 1;
+      let metrics = null;
+      let terrain = new Map();
+      let snake = [];
+      let food = { x: 0, y: 0 };
+      let dir = DIRS.right;
+      let queuedDir = DIRS.right;
+      let touchStart = null;
+      let restoreTimer = 0;
+
+      const pad = (value) => String(value).padStart(3, "0");
+      const keyFor = (cell) => `${cell.x},${cell.y}`;
+      const css = (name, fallback) => getComputedStyle(document.documentElement).getPropertyValue(name).trim() || fallback;
+      const clamp = (value, min, max) => Math.min(Math.max(value, min), max);
+
+      const canvasFontFromElement = (element) => {
+        const style = getComputedStyle(element);
+        const fontStyle = style.fontStyle && style.fontStyle !== "normal" ? style.fontStyle : "";
+        const fontWeight = style.fontWeight || "400";
+        const fontSize = style.fontSize || "16px";
+        const fontFamily = style.fontFamily || FONT_STACK;
+        return `${fontStyle} ${fontWeight} ${fontSize} ${fontFamily}`.trim();
+      };
+
+      const getText = (element) => {
+        const text = element.textContent ?? "";
+        return text.replace(/\s+/g, " ").trim();
+      };
+
+      const updateReadout = () => {
+        scoreOutput.value = pad(score);
+        bestOutput.value = pad(best);
+        launchButton.textContent = active ? "running" : "snake";
+        layer.dataset.state = restoring ? "restoring" : active ? "playing" : "idle";
+      };
+
+      const setCanvasSize = () => {
+        pixelRatio = Math.min(window.devicePixelRatio || 1, 2);
+        const width = window.innerWidth;
+        const height = window.innerHeight;
+        canvas.width = Math.max(1, Math.round(width * pixelRatio));
+        canvas.height = Math.max(1, Math.round(height * pixelRatio));
+        canvas.style.width = `${width}px`;
+        canvas.style.height = `${height}px`;
+        ctx.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
+
+        const actorPx = clamp(Math.floor(width / 52), 18, 30);
+        const terrainPx = Math.max(14, Math.round(actorPx * 0.78));
+        const font = `900 ${terrainPx}px ${FONT_STACK}`;
+        const actorFont = `900 ${actorPx}px ${FONT_STACK}`;
+        const appleFont = `900 ${Math.round(actorPx * 1.2)}px ${FONT_STACK}`;
+        const unit = prepareWithSegments("#", actorFont);
+        const glyphWidth = Math.max(12, measureNaturalWidth(unit));
+        const cellSize = Math.round(Math.max(glyphWidth, actorPx * 1.08));
+
+        metrics = {
+          actorFont,
+          appleFont,
+          cellHeight: cellSize,
+          cellWidth: cellSize,
+          cols: Math.max(18, Math.floor(width / cellSize)),
+          font,
+          rows: Math.max(14, Math.floor(height / cellSize)),
+          viewHeight: height,
+          viewWidth: width
+        };
+      };
+
+      const markCell = (x, y, glyph = "#") => {
+        if (!metrics || x < 0 || y < 0 || x >= metrics.cols || y >= metrics.rows) return;
+        terrain.set(`${x},${y}`, glyph);
+      };
+
+      const markRectBorder = (rect, glyph = "#") => {
+        if (!metrics) return;
+        const left = clamp(Math.floor(rect.left / metrics.cellWidth), 0, metrics.cols - 1);
+        const right = clamp(Math.ceil(rect.right / metrics.cellWidth) - 1, 0, metrics.cols - 1);
+        const top = clamp(Math.floor(rect.top / metrics.cellHeight), 0, metrics.rows - 1);
+        const bottom = clamp(Math.ceil(rect.bottom / metrics.cellHeight) - 1, 0, metrics.rows - 1);
+
+        for (let x = left; x <= right; x += 1) {
+          markCell(x, top, glyph);
+          markCell(x, bottom, glyph);
+        }
+
+        for (let y = top; y <= bottom; y += 1) {
+          markCell(left, y, glyph);
+          markCell(right, y, glyph);
+        }
+      };
+
+      const markTextTerrain = (element, rect) => {
+        if (!metrics) return;
+
+        const text = getText(element);
+        if (!text) return;
+
+        const style = getComputedStyle(element);
+        const font = canvasFontFromElement(element);
+        const fontSize = Number.parseFloat(style.fontSize) || 16;
+        const lineHeight = Number.parseFloat(style.lineHeight) || fontSize * 1.48;
+        const padLeft = Number.parseFloat(style.paddingLeft) || 0;
+        const padRight = Number.parseFloat(style.paddingRight) || 0;
+        const padTop = Number.parseFloat(style.paddingTop) || 0;
+        const maxWidth = Math.max(metrics.cellWidth, rect.width - padLeft - padRight);
+        const prepared = prepareWithSegments(text, font);
+        const { lines } = layoutWithLines(prepared, maxWidth, lineHeight);
+        const align = style.textAlign;
+
+        lines.forEach((line, lineIndex) => {
+          const lineText = line.text.trim() || text;
+          const alignOffset =
+            align === "center" ? (maxWidth - line.width) / 2 :
+            align === "right" || align === "end" ? maxWidth - line.width :
+            0;
+          const xStart = rect.left + padLeft + Math.max(0, alignOffset);
+          const yStart = rect.top + padTop + lineIndex * lineHeight + lineHeight * 0.5;
+          const row = Math.floor(yStart / metrics.cellHeight);
+          const startCol = Math.floor(xStart / metrics.cellWidth);
+          const endCol = Math.ceil((xStart + Math.max(line.width, metrics.cellWidth)) / metrics.cellWidth);
+
+          for (let col = startCol; col < endCol; col += 1) {
+            const glyph = lineText[(col - startCol) % lineText.length] || "#";
+            markCell(col, row, glyph);
+          }
+        });
+      };
+
+      const buildTerrain = () => {
+        terrain = new Map();
+
+        document.querySelectorAll(TERRAIN_SELECTOR).forEach((element) => {
+          if (!(element instanceof HTMLElement)) return;
+          const rect = element.getBoundingClientRect();
+          const offscreen = rect.bottom < 0 || rect.right < 0 || rect.top > window.innerHeight || rect.left > window.innerWidth;
+          if (offscreen || rect.width < 2 || rect.height < 2) return;
+
+          if (element.matches(".nav, .nav a, .nav button, .hero-name, .role-line")) {
+            markRectBorder(rect, "#");
+          }
+
+          markTextTerrain(element, rect);
+        });
+      };
+
+      const freeAt = (cell, body = snake) => {
+        if (!metrics) return false;
+        if (cell.x <= 0 || cell.y <= 0 || cell.x >= metrics.cols - 1 || cell.y >= metrics.rows - 1) return false;
+        if (terrain.has(keyFor(cell))) return false;
+        return !body.some((part) => part.x === cell.x && part.y === cell.y);
+      };
+
+      const wrapCell = (cell) => {
+        if (!metrics) return cell;
+
+        let x = cell.x;
+        let y = cell.y;
+
+        if (x <= 0) x = metrics.cols - 2;
+        else if (x >= metrics.cols - 1) x = 1;
+
+        if (y <= 0) y = metrics.rows - 2;
+        else if (y >= metrics.rows - 1) y = 1;
+
+        return { x, y };
+      };
+
+      const staticFreeAt = (x, y) => {
+        if (!metrics) return false;
+        if (x <= 0 || y <= 0 || x >= metrics.cols - 1 || y >= metrics.rows - 1) return false;
+        return !terrain.has(`${x},${y}`);
+      };
+
+      const findStart = () => {
+        if (!metrics) return { direction: DIRS.right, parts: [{ x: 4, y: 4 }] };
+
+        let bestRun = null;
+
+        for (let y = 1; y < metrics.rows - 1; y += 1) {
+          let start = null;
+
+          for (let x = 1; x < metrics.cols; x += 1) {
+            const free = x < metrics.cols - 1 && staticFreeAt(x, y);
+
+            if (free && start === null) start = x;
+
+            if ((!free || x === metrics.cols - 1) && start !== null) {
+              const end = x - 1;
+              const length = end - start + 1;
+              const centerY = y / metrics.rows;
+              const laneScore = length - Math.abs(centerY - 0.58) * 5;
+              if (length >= 12 && (!bestRun || laneScore > bestRun.score)) {
+                bestRun = { end, length, score: laneScore, start, y };
+              }
+              start = null;
+            }
+          }
+        }
+
+        if (bestRun) {
+          const headX = Math.min(bestRun.end - 1, bestRun.start + 3);
+          return {
+            direction: DIRS.right,
+            parts: [
+              { x: headX, y: bestRun.y },
+              { x: headX - 1, y: bestRun.y },
+              { x: headX - 2, y: bestRun.y },
+              { x: headX - 3, y: bestRun.y }
+            ]
+          };
+        }
+
+        const preferred = [
+          { x: Math.floor(metrics.cols * 0.12), y: Math.floor(metrics.rows * 0.56) },
+          { x: Math.floor(metrics.cols * 0.08), y: Math.floor(metrics.rows * 0.82) },
+          { x: Math.floor(metrics.cols * 0.55), y: Math.floor(metrics.rows * 0.78) },
+          { x: Math.floor(metrics.cols * 0.72), y: Math.floor(metrics.rows * 0.22) }
+        ];
+
+        for (const origin of preferred) {
+          const maxRadius = Math.max(metrics.cols, metrics.rows);
+          for (let radius = 0; radius < maxRadius; radius += 1) {
+            for (let y = origin.y - radius; y <= origin.y + radius; y += 1) {
+              for (let x = origin.x - radius; x <= origin.x + radius; x += 1) {
+                if (Math.abs(x - origin.x) !== radius && Math.abs(y - origin.y) !== radius) continue;
+                const parts = [
+                  { x, y },
+                  { x: x - 1, y },
+                  { x: x - 2, y },
+                  { x: x - 3, y }
+                ];
+                if (parts.every((part) => freeAt(part, []))) return { direction: DIRS.right, parts };
+              }
+            }
+          }
+        }
+
+        return { direction: DIRS.right, parts: [{ x: 4, y: 2 }, { x: 3, y: 2 }, { x: 2, y: 2 }, { x: 1, y: 2 }] };
+      };
+
+      const randomFreeCell = () => {
+        if (!metrics) return { x: 1, y: 1 };
+
+        const options = [];
+        for (let y = 1; y < metrics.rows - 1; y += 1) {
+          for (let x = 1; x < metrics.cols - 1; x += 1) {
+            const cell = { x, y };
+            if (freeAt(cell)) options.push(cell);
+          }
+        }
+
+        return options[Math.floor(Math.random() * options.length)] ?? { x: 1, y: 1 };
+      };
+
+      const drawCell = (cell, glyph, fillStyle) => {
+        if (!metrics) return;
+        ctx.save();
+        ctx.font = metrics.font;
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillStyle = fillStyle;
+        ctx.fillText(glyph, (cell.x + 0.5) * metrics.cellWidth, (cell.y + 0.5) * metrics.cellHeight);
+        ctx.restore();
+      };
+
+      const drawActorCell = (cell, glyph, fillStyle, font = metrics?.actorFont) => {
+        if (!metrics || !font) return;
+        ctx.save();
+        ctx.font = font;
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillStyle = fillStyle;
+        ctx.shadowColor = "rgba(36, 20, 7, 0.28)";
+        ctx.shadowBlur = 0;
+        ctx.shadowOffsetX = 2;
+        ctx.shadowOffsetY = 2;
+        ctx.fillText(glyph, (cell.x + 0.5) * metrics.cellWidth, (cell.y + 0.52) * metrics.cellHeight);
+        ctx.restore();
+      };
+
+      const draw = () => {
+        if (!metrics) return;
+
+        ctx.clearRect(0, 0, metrics.viewWidth, metrics.viewHeight);
+
+        const terrainColor = "rgba(36, 20, 7, 0.42)";
+        const foodColor = css("--accent", "#e86f00");
+        const snakeHead = "#083f35";
+        const snakeBody = "#126d5c";
+
+        for (let x = 0; x < metrics.cols; x += 1) {
+          drawCell({ x, y: 0 }, "#", terrainColor);
+          drawCell({ x, y: metrics.rows - 1 }, "#", terrainColor);
+        }
+
+        for (let y = 0; y < metrics.rows; y += 1) {
+          drawCell({ x: 0, y }, "#", terrainColor);
+          drawCell({ x: metrics.cols - 1, y }, "#", terrainColor);
+        }
+
+        drawActorCell(food, "*", foodColor, metrics.appleFont);
+
+        snake.forEach((part, index) => {
+          drawActorCell(part, "#", index === 0 ? snakeHead : snakeBody, metrics.actorFont);
+        });
+      };
+
+      const stopLoop = () => {
+        if (loopTimer) window.clearTimeout(loopTimer);
+        loopTimer = 0;
+      };
+
+      const exitGame = () => {
+        stopLoop();
+        active = false;
+        running = false;
+        restoring = false;
+        layer.setAttribute("aria-hidden", "true");
+        document.body.classList.remove("snake-mode");
+        launchButton.disabled = false;
+        window.clearTimeout(restoreTimer);
+        updateReadout();
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        launchButton.focus({ preventScroll: true });
+      };
+
+      const crash = () => {
+        running = false;
+        restoring = true;
+        best = Math.max(best, score);
+        window.localStorage.setItem("ritwic-site-snake-best", String(best));
+        updateReadout();
+        draw();
+        window.clearTimeout(restoreTimer);
+        restoreTimer = window.setTimeout(exitGame, 900);
+      };
+
+      const step = () => {
+        if (!metrics) return;
+
+        if (queuedDir.x + dir.x !== 0 || queuedDir.y + dir.y !== 0) {
+          dir = queuedDir;
+        }
+
+        const head = snake[0];
+        const next = wrapCell({ x: head.x + dir.x, y: head.y + dir.y });
+        const willEat = next.x === food.x && next.y === food.y;
+        const body = willEat ? snake : snake.slice(0, -1);
+
+        if (!freeAt(next, body)) {
+          crash();
+          return;
+        }
+
+        snake.unshift(next);
+
+        if (willEat) {
+          score += 10;
+          tickMs = Math.max(72, tickMs - 3);
+          best = Math.max(best, score);
+          food = randomFreeCell();
+        } else {
+          snake.pop();
+        }
+
+        updateReadout();
+      };
+
+      const loop = () => {
+        if (!running) {
+          loopTimer = 0;
+          return;
+        }
+
+        step();
+        draw();
+        loopTimer = window.setTimeout(loop, tickMs);
+      };
+
+      const rebuildGame = () => {
+        setCanvasSize();
+        buildTerrain();
+        const start = findStart();
+        snake = start.parts;
+        food = randomFreeCell();
+        dir = start.direction;
+        queuedDir = start.direction;
+        score = 0;
+        tickMs = 122;
+        updateReadout();
+        draw();
+      };
+
+      const startGame = () => {
+        window.clearTimeout(restoreTimer);
+        window.scrollTo(0, 0);
+        active = true;
+        running = true;
+        restoring = false;
+        launchButton.disabled = true;
+        layer.setAttribute("aria-hidden", "false");
+        document.body.classList.add("snake-mode");
+        rebuildGame();
+        stopLoop();
+        loopTimer = window.setTimeout(loop, tickMs);
+      };
+
+      const setDirection = (nextDir) => {
+        queuedDir = nextDir;
+      };
+
+      launchButton.addEventListener("click", startGame);
+      exitButton.addEventListener("click", exitGame);
+
+      directionButtons.forEach((button) => {
+        if (!(button instanceof HTMLButtonElement)) return;
+        button.addEventListener("click", () => {
+          const dirName = button.dataset.siteSnakeDir;
+          const nextDir =
+            dirName === "up" ? DIRS.up :
+            dirName === "down" ? DIRS.down :
+            dirName === "left" ? DIRS.left :
+            dirName === "right" ? DIRS.right :
+            null;
+          if (nextDir) setDirection(nextDir);
+        });
+      });
+
+      window.addEventListener("keydown", (event) => {
+        if (!active) return;
+
+        const key = event.key.toLowerCase();
+        if (key === "escape") {
+          event.preventDefault();
+          exitGame();
+          return;
+        }
+
+        const nextDir = KEY_DIRS.get(key);
+        if (!nextDir) return;
+
+        event.preventDefault();
+        setDirection(nextDir);
+      });
+
+      window.addEventListener("pointerdown", (event) => {
+        if (!active) return;
+        touchStart = { x: event.clientX, y: event.clientY };
+      }, { passive: true });
+
+      window.addEventListener("pointerup", (event) => {
+        if (!active || !touchStart) return;
+
+        const dx = event.clientX - touchStart.x;
+        const dy = event.clientY - touchStart.y;
+        touchStart = null;
+        if (Math.max(Math.abs(dx), Math.abs(dy)) < 22) return;
+
+        setDirection(Math.abs(dx) > Math.abs(dy) ? (dx > 0 ? DIRS.right : DIRS.left) : dy > 0 ? DIRS.down : DIRS.up);
+      }, { passive: true });
+
+      window.addEventListener("resize", () => {
+        if (!active) return;
+        rebuildGame();
+      });
+
+      bestOutput.value = pad(best);
+      updateReadout();
+    }
+  }
+</script>

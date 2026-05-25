@@ -1,5 +1,6 @@
 ---
 import "../styles/global.css";
+import SiteCursor from "../components/SiteCursor.astro";
 ---
 
 <!doctype html>
@@ -13,12 +14,15 @@ import "../styles/global.css";
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
   </head>
   <body>
+    <SiteCursor />
     <main class="not-found-shell">
       <section class="not-found-panel" aria-labelledby="not-found-title">
         <p class="eyebrow">404</p>
         <h1 id="not-found-title">This page drifted.</h1>
         <p>The site is intentionally small, so the path you want is probably one step back.</p>
-        <a class="action-link" href="/">return home</a>
+        <a class="action-link" href="/" target="_blank" rel="noopener noreferrer">
+          <span class="link-text">return home</span>
+        </a>
       </section>
     </main>
   </body>

@@ -118,16 +118,6 @@ img {
   background: var(--accent);
 }
 
-.field {
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-}
-
-.field {
-  z-index: 1;
-}
-
 .skip-link {
   position: fixed;
   top: 12px;
@@ -254,13 +244,24 @@ img {
   border: 2px solid var(--brutal-stroke);
   padding: 6px;
   color: var(--ink);
-  background:
-    repeating-linear-gradient(135deg, transparent 0 6px, var(--brutal-hatch) 6px 7px),
-    var(--accent);
+  background-color: var(--accent);
+  background-image:
+    repeating-linear-gradient(135deg, rgba(36, 20, 7, 0.2) 0 2px, transparent 2px 10px),
+    repeating-linear-gradient(45deg, rgba(255, 246, 232, 0.17) 0 2px, transparent 2px 12px),
+    radial-gradient(circle, rgba(36, 20, 7, 0.18) 0 1.5px, transparent 1.8px);
+  background-position:
+    0 0,
+    0 0,
+    0 0;
+  background-size:
+    18px 18px,
+    22px 22px,
+    13px 13px;
   box-shadow:
     6px 6px 0 var(--brutal-drop),
     10px 10px 0 rgba(var(--accent-rgb), 0.12);
   transform: rotate(-0.4deg);
+  animation: hero-stop-motion 760ms steps(1, end) infinite;
   transition:
     box-shadow 180ms ease,
     transform 180ms ease;
@@ -342,15 +343,26 @@ h1 {
   border: 3px solid var(--brutal-stroke);
   padding: 0.05em 0.15em 0.1em;
   color: var(--brutal-face-ink);
-  background:
-    repeating-linear-gradient(135deg, transparent 0 6px, var(--brutal-hatch) 6px 7px),
-    var(--accent);
+  background-color: var(--accent);
+  background-image:
+    repeating-linear-gradient(135deg, rgba(36, 20, 7, 0.2) 0 2px, transparent 2px 10px),
+    repeating-linear-gradient(45deg, rgba(255, 246, 232, 0.17) 0 2px, transparent 2px 12px),
+    radial-gradient(circle, rgba(36, 20, 7, 0.18) 0 1.5px, transparent 1.8px);
+  background-position:
+    0 0,
+    0 0,
+    0 0;
+  background-size:
+    18px 18px,
+    22px 22px,
+    13px 13px;
   box-shadow: 7px 7px 0 var(--brutal-drop);
   white-space: nowrap;
   text-shadow: none;
   transform: rotate(-0.55deg);
   transform-origin: left center;
   isolation: isolate;
+  animation: hero-stop-motion 760ms steps(1, end) infinite;
   transition:
     box-shadow 180ms ease,
     transform 180ms ease;
@@ -373,17 +385,6 @@ h1 {
   font-size: clamp(1rem, 2vw, 1.18rem);
   font-style: italic;
   transform: none;
-}
-
-.cursor {
-  display: inline-block;
-  width: 0.36ch;
-  height: 0.76em;
-  margin-left: 0.14ch;
-  translate: 0 0.07em;
-  background: var(--brutal-face-ink);
-  box-shadow: none;
-  animation: blink 920ms steps(1, end) infinite;
 }
 
 .summary-list {
@@ -630,8 +631,12 @@ h1 {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .field {
-    display: none;
+  .hero-name {
+    animation: none;
+  }
+
+  .nav {
+    animation: none;
   }
 }
 
@@ -656,8 +661,70 @@ h1 {
   }
 }
 
-@keyframes blink {
-  50% {
-    opacity: 0;
+@keyframes hero-stop-motion {
+  0% {
+    background-position:
+      0 0,
+      0 0,
+      0 0;
+    background-size:
+      18px 18px,
+      22px 22px,
+      13px 13px;
+  }
+
+  18% {
+    background-position:
+      13px 7px,
+      -9px 12px,
+      6px 4px;
+    background-size:
+      20px 20px,
+      24px 24px,
+      11px 11px;
+  }
+
+  36% {
+    background-position:
+      -8px 15px,
+      14px -7px,
+      -5px 9px;
+    background-size:
+      16px 16px,
+      20px 20px,
+      14px 14px;
+  }
+
+  54% {
+    background-position:
+      19px -6px,
+      4px 18px,
+      8px -3px;
+    background-size:
+      22px 22px,
+      18px 18px,
+      12px 12px;
+  }
+
+  72% {
+    background-position:
+      6px 20px,
+      -14px 3px,
+      12px 7px;
+    background-size:
+      17px 17px,
+      25px 25px,
+      15px 15px;
+  }
+
+  100% {
+    background-position:
+      24px 10px,
+      11px -13px,
+      -9px 11px;
+    background-size:
+      19px 19px,
+      21px 21px,
+      12px 12px;
   }
 }

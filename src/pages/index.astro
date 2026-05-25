@@ -1,28 +1,43 @@
 ---
 import "../styles/global.css";
+import SiteCursor from "../components/SiteCursor.astro";
+
+const summary = [
+  "i build AI systems that go into production",
+  "working across agents, backend and full stack systems"
+];
 
 const currently = [
-  { text: "Incoming SDE intern @ AWS Bedrock AgentCore", href: "https://aws.amazon.com/bedrock/" },
-  { text: "CS @ Georgia Tech, GPA 3.94", href: "https://www.gatech.edu/" },
-  { text: "AI infrastructure @ GT Makerspace / NVIDIA", href: "https://aimakerspace.gatech.edu/" },
-  { text: "TA @ CS 3510 Algorithms", href: "https://catalog.gatech.edu/courses-undergrad/cs/" }
+  {
+    text: "SDE Intern @ AWS Bedrock AgentCore",
+    href: "https://aws.amazon.com/bedrock/agentcore/"
+  },
+  {
+    text: "CS @ Georgia Tech: Intelligence and Info Internetworks",
+    href: "https://www.gatech.edu/"
+  },
+  {
+    text: "AI Infra Engineer @ AI Makerspace by NVIDIA",
+    href: "https://alregib.ece.gatech.edu/ai-makerspace/"
+  },
+  {
+    text: "TA for CS 3510: Design & Analysis of Algorithms",
+    href: "https://faculty.cc.gatech.edu/~ladha/S26/3510/"
+  }
 ];
 
 const focus = [
-  { text: "H100 model serving, reliability metrics, and monitoring" },
-  { text: "Algorithms teaching, quiz design, and C++ problem solving" },
-  { text: "Agent infrastructure with clean latency and observability paths" }
+  { text: "agentic workflows with tools, memory, routing, and evals" },
+  { text: "infra for serving agents and models reliably on cloud and GPU clusters" },
+  { text: "backend, full-stack, and low-latency systems" }
 ];
 
 const recently = [
-  { text: "Optimized distributed GPU serving workflows" },
-  { text: "Mentored 100+ students across algorithms recitations" }
-];
-
-const summary = [
-  "systems-minded CS student at Georgia Tech",
-  "building AI infrastructure for reliable agent workflows",
-  "comfortable close to the metal: C++, Linux, CUDA, telemetry"
+  { text: "working on secure agent handoff infrastructure at AWS" },
+  { text: "built agentic AI workflows on NVIDIA H100 clusters with full observability" },
+  { text: "full stack dev for GT Scheduler (30k+ users)", href: "https://www.gt-scheduler.org/" },
+  { text: "built autonomous multi-agent systems across finance, medicine, and education" },
+  { text: "taught algorithms to 500+ students as a TA" }
 ];
 
 const links = [
@@ -53,25 +68,20 @@ const links = [
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
   </head>
   <body>
-    <canvas class="field" id="field" aria-hidden="true"></canvas>
     <a class="skip-link" href="#content">Skip to content</a>
-    <div class="site-cursor" id="site-cursor" aria-hidden="true">
-      <span class="site-cursor-dot"></span>
-    </div>
+    <SiteCursor />
 
     <main class="page" id="content">
       <section class="home-card" aria-labelledby="intro-title">
         <header class="masthead">
           <nav class="nav" aria-label="Primary links">
-            {links.map((link) => <a href={link.href} rel="noreferrer"><span class="link-text">{link.label}</span></a>)}
+            {links.map((link) => <a href={link.href} target="_blank" rel="noopener noreferrer"><span class="link-text">{link.label}</span></a>)}
           </nav>
         </header>
 
         <div class="content-grid">
           <div class="intro">
-            <h1 id="intro-title" class="hero-name" data-text="Ritwic Verma">
-              Ritwic Verma<span class="cursor" aria-hidden="true"></span>
-            </h1>
+            <h1 id="intro-title" class="hero-name" data-text="Ritwic Verma">Ritwic Verma</h1>
             <p class="role-line">Computer Science Student, Systems + AI Infra</p>
             <ul class="summary-list" aria-label="Summary">
               {summary.map((item) => <li>{item}</li>)}
@@ -86,7 +96,7 @@ const links = [
                   currently.map((item) => (
                     <li>
                       <span class="arrow" aria-hidden="true">↳</span>
-                      <a href={item.href} rel="noreferrer">
+                      <a href={item.href} target="_blank" rel="noopener noreferrer">
                         <span class="link-text">{item.text}</span>
                       </a>
                     </li>
@@ -118,9 +128,17 @@ const links = [
                   recently.map((item) => (
                     <li>
                       <span class="arrow" aria-hidden="true">↳</span>
-                      <span class="plain-row">
-                        <span>{item.text}</span>
-                      </span>
+                      {
+                        item.href ? (
+                          <a href={item.href} target="_blank" rel="noopener noreferrer">
+                            <span class="link-text">{item.text}</span>
+                          </a>
+                        ) : (
+                          <span class="plain-row">
+                            <span>{item.text}</span>
+                          </span>
+                        )
+                      }
                     </li>
                   ))
                 }
@@ -131,105 +149,5 @@ const links = [
       </section>
     </main>
 
-    <script is:inline>
-      (() => {
-        const canvas = document.getElementById("field");
-        const siteCursor = document.getElementById("site-cursor");
-        const context = canvas?.getContext("2d", { alpha: true });
-        const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-
-        const pointer = {
-          overTextLink: false
-        };
-
-        const linkSelector = "a[href]";
-        const linkTextSelector = ".link-text";
-
-        const setCursorMode = (target) => {
-          const text = target instanceof Element ? target.closest(linkTextSelector) : null;
-          const link = text?.closest(linkSelector) ?? null;
-          pointer.overTextLink = Boolean(link);
-          siteCursor?.classList.toggle("is-link", pointer.overTextLink);
-        };
-
-        const movePointer = (event) => {
-          if (siteCursor) {
-            siteCursor.style.left = `${event.clientX}px`;
-            siteCursor.style.top = `${event.clientY}px`;
-            siteCursor.classList.add("is-visible");
-            setCursorMode(event.target);
-          }
-        };
-
-        window.addEventListener("pointermove", movePointer, { passive: true });
-        window.addEventListener("pointerover", (event) => setCursorMode(event.target), { passive: true });
-        window.addEventListener("pointerleave", () => {
-          siteCursor?.classList.remove("is-visible");
-          siteCursor?.classList.remove("is-link");
-          pointer.overTextLink = false;
-        }, { passive: true });
-
-        if (!canvas || !context || reduceMotion) return;
-
-        const points = Array.from({ length: 135 }, (_, index) => ({
-          x: Math.random(),
-          y: Math.random(),
-          phase: index * 0.73,
-          speed: 0.00022 + (index % 5) * 0.00003
-        }));
-
-        const resize = () => {
-          const scale = Math.min(window.devicePixelRatio || 1, 2);
-          canvas.width = Math.floor(window.innerWidth * scale);
-          canvas.height = Math.floor(window.innerHeight * scale);
-          canvas.style.width = `${window.innerWidth}px`;
-          canvas.style.height = `${window.innerHeight}px`;
-          context.setTransform(scale, 0, 0, scale, 0, 0);
-        };
-
-        const draw = (time) => {
-          const width = window.innerWidth;
-          const height = window.innerHeight;
-          const accentRgb = getComputedStyle(document.body).getPropertyValue("--accent-rgb").trim() || "232, 111, 0";
-          const particleRgb = getComputedStyle(document.body).getPropertyValue("--particle-rgb").trim() || "83, 48, 14";
-          context.clearRect(0, 0, width, height);
-
-          const resolved = points.map((point) => {
-            const px = point.x * width + Math.cos(time * point.speed + point.phase) * 18;
-            const py = point.y * height + Math.sin(time * point.speed * 1.4 + point.phase) * 14;
-            return { x: px, y: py };
-          });
-
-          for (let i = 0; i < resolved.length; i += 1) {
-            for (let j = i + 1; j < resolved.length; j += 1) {
-              const a = resolved[i];
-              const b = resolved[j];
-              const distance = Math.hypot(a.x - b.x, a.y - b.y);
-              if (distance < 132) {
-                context.beginPath();
-                context.moveTo(a.x, a.y);
-                context.lineTo(b.x, b.y);
-                context.strokeStyle = `rgba(${accentRgb}, ${0.22 * (1 - distance / 132)})`;
-                context.lineWidth = 0.95;
-                context.stroke();
-              }
-            }
-          }
-
-          for (const point of resolved) {
-            context.beginPath();
-            context.arc(point.x, point.y, 1.65, 0, Math.PI * 2);
-            context.fillStyle = `rgba(${particleRgb}, 0.58)`;
-            context.fill();
-          }
-
-          window.requestAnimationFrame(draw);
-        };
-
-        window.addEventListener("resize", resize);
-        resize();
-        window.requestAnimationFrame(draw);
-      })();
-    </script>
   </body>
 </html>

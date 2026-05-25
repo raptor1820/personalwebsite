@@ -1,6 +1,7 @@
 ---
 import "../styles/global.css";
 import SiteCursor from "../components/SiteCursor.astro";
+import SiteSnake from "../components/SiteSnake.astro";
 
 const summary = [
   "i build AI systems that go into production",
@@ -37,7 +38,8 @@ const recently = [
   { text: "built agentic AI workflows on NVIDIA H100 clusters with full observability" },
   { text: "full stack dev for GT Scheduler (30k+ users)", href: "https://www.gt-scheduler.org/" },
   { text: "built autonomous multi-agent systems across finance, medicine, and education" },
-  { text: "taught algorithms to 500+ students as a TA" }
+  { text: "taught algorithms to 500+ students as a TA" },
+  { text: "remembered to play some snake :)" }
 ];
 
 const links = [
@@ -76,13 +78,14 @@ const links = [
         <header class="masthead">
           <nav class="nav" aria-label="Primary links">
             {links.map((link) => <a href={link.href} target="_blank" rel="noopener noreferrer"><span class="link-text">{link.label}</span></a>)}
+            <button id="site-snake-launch" type="button" aria-label="Play snake on this page">snake</button>
           </nav>
         </header>
 
         <div class="content-grid">
           <div class="intro">
             <h1 id="intro-title" class="hero-name" data-text="Ritwic Verma">Ritwic Verma</h1>
-            <p class="role-line">Computer Science Student, Systems + AI Infra</p>
+            <!-- <p class="role-line">cs major, builder, engineer</p> -->
             <ul class="summary-list" aria-label="Summary">
               {summary.map((item) => <li>{item}</li>)}
             </ul>
@@ -148,6 +151,8 @@ const links = [
         </div>
       </section>
     </main>
+
+    <SiteSnake />
 
   </body>
 </html>

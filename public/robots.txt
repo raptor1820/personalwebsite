@@ -1,0 +1,7 @@
+# https://www.rfc-editor.org/rfc/rfc9309
+# Public personal site. All well-behaved crawlers and agents may read it.
+
+User-agent: *
+Allow: /
+
+Sitemap: https://ritwic.com/sitemap.xml

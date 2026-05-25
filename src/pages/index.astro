@@ -3,6 +3,10 @@ import "../styles/global.css";
 import SiteCursor from "../components/SiteCursor.astro";
 import SiteSnake from "../components/SiteSnake.astro";
 
+const canonicalUrl = "https://ritwic.com/";
+const siteDescription =
+  "Ritwic Verma is a computer science student at Georgia Tech building production AI systems, agent infrastructure, backend systems, full-stack software, and low-latency infrastructure.";
+
 const summary = [
   "i build AI systems that go into production",
   "working across agents, backend and full stack systems"
@@ -47,6 +51,56 @@ const links = [
   { label: "linkedin", href: "https://linkedin.com/in/ritwicverma" },
   { label: "email", href: "mailto:ritwicverma@gmail.com" }
 ];
+
+const personJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "Person",
+  "@id": `${canonicalUrl}#person`,
+  name: "Ritwic Verma",
+  url: canonicalUrl,
+  email: "mailto:ritwicverma@gmail.com",
+  description: siteDescription,
+  jobTitle: [
+    "Computer Science Student",
+    "Software Development Engineer Intern",
+    "AI Infrastructure Engineer",
+    "Teaching Assistant"
+  ],
+  affiliation: [
+    {
+      "@type": "CollegeOrUniversity",
+      name: "Georgia Institute of Technology",
+      url: "https://www.gatech.edu/"
+    },
+    {
+      "@type": "Organization",
+      name: "AWS Bedrock AgentCore",
+      url: "https://aws.amazon.com/bedrock/agentcore/"
+    },
+    {
+      "@type": "Organization",
+      name: "AI Makerspace by NVIDIA",
+      url: "https://alregib.ece.gatech.edu/ai-makerspace/"
+    }
+  ],
+  knowsAbout: [
+    "AI infrastructure",
+    "agentic workflows",
+    "AI agents",
+    "model serving",
+    "backend systems",
+    "full-stack software",
+    "low-latency systems",
+    "cloud infrastructure",
+    "GPU clusters",
+    "software engineering"
+  ],
+  sameAs: [
+    "https://github.com/raptor1820",
+    "https://linkedin.com/in/ritwicverma"
+  ],
+  mainEntityOfPage: canonicalUrl
+};
 ---
 
 <!doctype html>
@@ -56,18 +110,29 @@ const links = [
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta
       name="description"
-      content="Ritwic Verma is a computer science student at Georgia Tech building developer tools, civic software, and practical AI systems."
+      content={siteDescription}
     />
+    <meta name="author" content="Ritwic Verma" />
+    <meta
+      name="keywords"
+      content="Ritwic Verma, Georgia Tech, AWS Bedrock AgentCore, AI infrastructure, agent infrastructure, AI agents, backend systems, full-stack software, low-latency systems, GPU clusters"
+    />
+    <meta name="robots" content="index, follow, max-image-preview:large" />
     <meta name="theme-color" content="#fff6e8" />
     <meta property="og:title" content="Ritwic Verma" />
     <meta
       property="og:description"
-      content="Computer science student at Georgia Tech building useful software systems."
+      content={siteDescription}
     />
     <meta property="og:type" content="website" />
-    <meta property="og:url" content="https://ritwic.com" />
+    <meta property="og:url" content={canonicalUrl} />
     <title>Ritwic Verma</title>
+    <link rel="canonical" href={canonicalUrl} />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="sitemap" type="application/xml" href="/sitemap.xml" />
+    <link rel="alternate" type="text/plain" href="/llms.txt" title="LLM-readable site summary" />
+    <link rel="alternate" type="text/plain" href="/agents.txt" title="Agent guidance for ritwic.com" />
+    <script type="application/ld+json" set:html={JSON.stringify(personJsonLd)} />
   </head>
   <body>
     <a class="skip-link" href="#content">Skip to content</a>

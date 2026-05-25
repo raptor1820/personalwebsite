@@ -1,3 +1,3 @@
 # ritwic.com
 
-99 lighthouse with a snake game
+100 lighthouse with a snake game

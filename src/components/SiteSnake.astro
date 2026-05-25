@@ -40,14 +40,14 @@
     if (ctx) {
       const FONT_STACK = "'Cascadia Mono', 'JetBrains Mono', 'Fira Code', 'IBM Plex Mono', Consolas, monospace";
       const TERRAIN_SELECTOR = [
-        ".nav",
-        ".nav a",
+        ".nav a .link-text",
         ".nav button",
         ".hero-name",
-        ".role-line",
         ".summary-list li",
         ".list-block h2",
-        ".list-block li"
+        ".list-block a .link-text",
+        ".plain-row strong",
+        ".plain-row > span"
       ].join(",");
       const DIRS = {
         up: { x: 0, y: -1 },
@@ -65,10 +65,16 @@
         ["arrowright", DIRS.right],
         ["d", DIRS.right]
       ]);
+      const WORD_SEGMENTER =
+        typeof Intl !== "undefined" && "Segmenter" in Intl
+          ? new Intl.Segmenter(undefined, { granularity: "word" })
+          : null;
+      const WORD_PATTERN = /[\p{L}\p{N}]/u;
 
       let active = false;
       let running = false;
       let restoring = false;
+      let advanceRemainder = 0;
       let loopTimer = 0;
       let tickMs = 122;
       let score = 0;
@@ -76,6 +82,7 @@
       let pixelRatio = 1;
       let metrics = null;
       let terrain = new Map();
+      let wordLayout = [];
       let snake = [];
       let food = { x: 0, y: 0 };
       let dir = DIRS.right;
@@ -88,10 +95,10 @@
       const css = (name, fallback) => getComputedStyle(document.documentElement).getPropertyValue(name).trim() || fallback;
       const clamp = (value, min, max) => Math.min(Math.max(value, min), max);
 
-      const canvasFontFromElement = (element) => {
+      const canvasFontFromElement = (element, weightOverride = null) => {
         const style = getComputedStyle(element);
         const fontStyle = style.fontStyle && style.fontStyle !== "normal" ? style.fontStyle : "";
-        const fontWeight = style.fontWeight || "400";
+        const fontWeight = weightOverride ?? style.fontWeight ?? "400";
         const fontSize = style.fontSize || "16px";
         const fontFamily = style.fontFamily || FONT_STACK;
         return `${fontStyle} ${fontWeight} ${fontSize} ${fontFamily}`.trim();
@@ -100,6 +107,55 @@
       const getText = (element) => {
         const text = element.textContent ?? "";
         return text.replace(/\s+/g, " ").trim();
+      };
+
+      const hasWordContent = (text) => WORD_PATTERN.test(text);
+
+      const measureText = (text, font) => {
+        if (!text) return 0;
+        return measureNaturalWidth(prepareWithSegments(text, font));
+      };
+
+      const measureAdvance = (text, font) => {
+        if (!text) return 0;
+        if (hasWordContent(text)) return measureText(text, font);
+
+        ctx.save();
+        ctx.font = font;
+        const width = ctx.measureText(text).width;
+        ctx.restore();
+        return width;
+      };
+
+      const getWordRuns = (lineText, font) => {
+        const segments = WORD_SEGMENTER
+          ? Array.from(WORD_SEGMENTER.segment(lineText), (segment) => ({
+              isWordLike: segment.isWordLike ?? hasWordContent(segment.segment),
+              text: segment.segment
+            }))
+          : (lineText.match(/\S+|\s+/gu) ?? []).map((text) => ({
+              isWordLike: hasWordContent(text),
+              text
+            }));
+
+        let x = 0;
+        const runs = [];
+
+        segments.forEach((segment) => {
+          const width = measureAdvance(segment.text, font);
+
+          if (segment.isWordLike && hasWordContent(segment.text)) {
+            runs.push({
+              text: segment.text,
+              width: measureText(segment.text, font),
+              x
+            });
+          }
+
+          x += width;
+        });
+
+        return runs;
       };
 
       const updateReadout = () => {
@@ -146,32 +202,72 @@
         terrain.set(`${x},${y}`, glyph);
       };
 
-      const markRectBorder = (rect, glyph = "#") => {
+      const markWordCells = (word) => {
         if (!metrics) return;
-        const left = clamp(Math.floor(rect.left / metrics.cellWidth), 0, metrics.cols - 1);
-        const right = clamp(Math.ceil(rect.right / metrics.cellWidth) - 1, 0, metrics.cols - 1);
-        const top = clamp(Math.floor(rect.top / metrics.cellHeight), 0, metrics.rows - 1);
-        const bottom = clamp(Math.ceil(rect.bottom / metrics.cellHeight) - 1, 0, metrics.rows - 1);
-
-        for (let x = left; x <= right; x += 1) {
-          markCell(x, top, glyph);
-          markCell(x, bottom, glyph);
-        }
+        const marginX = Math.min(3, metrics.cellWidth * 0.12);
+        const marginY = Math.min(3, metrics.cellHeight * 0.12);
+        const left = clamp(Math.floor((word.left - marginX) / metrics.cellWidth), 1, metrics.cols - 2);
+        const right = clamp(Math.ceil((word.right + marginX) / metrics.cellWidth) - 1, 1, metrics.cols - 2);
+        const top = clamp(Math.floor((word.top - marginY) / metrics.cellHeight), 1, metrics.rows - 2);
+        const bottom = clamp(Math.ceil((word.bottom + marginY) / metrics.cellHeight) - 1, 1, metrics.rows - 2);
+        const glyph = word.text[0] || "#";
+        let marked = false;
 
         for (let y = top; y <= bottom; y += 1) {
-          markCell(left, y, glyph);
-          markCell(right, y, glyph);
+          const centerY = (y + 0.5) * metrics.cellHeight;
+
+          for (let x = left; x <= right; x += 1) {
+            const centerX = (x + 0.5) * metrics.cellWidth;
+            const centerIsInside =
+              centerX >= word.left - marginX &&
+              centerX <= word.right + marginX &&
+              centerY >= word.top - marginY &&
+              centerY <= word.bottom + marginY;
+
+            if (centerIsInside) {
+              markCell(x, y, glyph);
+              marked = true;
+            }
+          }
+        }
+
+        if (!marked) {
+          markCell(
+            clamp(Math.floor(word.centerX / metrics.cellWidth), 1, metrics.cols - 2),
+            clamp(Math.floor(word.centerY / metrics.cellHeight), 1, metrics.rows - 2),
+            glyph
+          );
         }
       };
 
-      const markTextTerrain = (element, rect) => {
-        if (!metrics) return;
+      const chooseObstacleWords = (words) => {
+        const candidates = words
+          .map((word, index) => ({ index, word }))
+          .filter(({ word }) => word.text.length > 1 && hasWordContent(word.text));
+        const maxCount = Math.max(4, Math.floor(candidates.length * 0.36));
+        const targetCount = clamp(Math.round(candidates.length * 0.28), Math.min(4, candidates.length), maxCount);
+
+        for (let index = candidates.length - 1; index > 0; index -= 1) {
+          const swapIndex = Math.floor(Math.random() * (index + 1));
+          [candidates[index], candidates[swapIndex]] = [candidates[swapIndex], candidates[index]];
+        }
+
+        const selected = new Set(candidates.slice(0, targetCount).map(({ index }) => index));
+        return words.map((word, index) => ({
+          ...word,
+          obstacle: selected.has(index)
+        }));
+      };
+
+      const collectWordsFromElement = (element, rect) => {
+        if (!metrics) return [];
 
         const text = getText(element);
-        if (!text) return;
+        if (!text) return [];
 
         const style = getComputedStyle(element);
         const font = canvasFontFromElement(element);
+        const obstacleFont = canvasFontFromElement(element, "900");
         const fontSize = Number.parseFloat(style.fontSize) || 16;
         const lineHeight = Number.parseFloat(style.lineHeight) || fontSize * 1.48;
         const padLeft = Number.parseFloat(style.paddingLeft) || 0;
@@ -181,28 +277,46 @@
         const prepared = prepareWithSegments(text, font);
         const { lines } = layoutWithLines(prepared, maxWidth, lineHeight);
         const align = style.textAlign;
+        const words = [];
 
         lines.forEach((line, lineIndex) => {
-          const lineText = line.text.trim() || text;
+          const lineText = line.text;
           const alignOffset =
             align === "center" ? (maxWidth - line.width) / 2 :
             align === "right" || align === "end" ? maxWidth - line.width :
             0;
           const xStart = rect.left + padLeft + Math.max(0, alignOffset);
-          const yStart = rect.top + padTop + lineIndex * lineHeight + lineHeight * 0.5;
-          const row = Math.floor(yStart / metrics.cellHeight);
-          const startCol = Math.floor(xStart / metrics.cellWidth);
-          const endCol = Math.ceil((xStart + Math.max(line.width, metrics.cellWidth)) / metrics.cellWidth);
+          const centerY = rect.top + padTop + lineIndex * lineHeight + lineHeight * 0.5;
+          const top = centerY - fontSize * 0.58;
+          const bottom = centerY + fontSize * 0.58;
 
-          for (let col = startCol; col < endCol; col += 1) {
-            const glyph = lineText[(col - startCol) % lineText.length] || "#";
-            markCell(col, row, glyph);
-          }
+          getWordRuns(lineText, font).forEach((run) => {
+            const left = xStart + run.x;
+            const right = left + run.width;
+
+            if (right < 0 || left > metrics.viewWidth || bottom < 0 || top > metrics.viewHeight) return;
+
+            words.push({
+              bottom,
+              centerX: left + run.width / 2,
+              centerY,
+              font,
+              obstacle: false,
+              obstacleFont,
+              left,
+              right,
+              text: run.text,
+              top
+            });
+          });
         });
+
+        return words;
       };
 
       const buildTerrain = () => {
         terrain = new Map();
+        const words = [];
 
         document.querySelectorAll(TERRAIN_SELECTOR).forEach((element) => {
           if (!(element instanceof HTMLElement)) return;
@@ -210,11 +324,12 @@
           const offscreen = rect.bottom < 0 || rect.right < 0 || rect.top > window.innerHeight || rect.left > window.innerWidth;
           if (offscreen || rect.width < 2 || rect.height < 2) return;
 
-          if (element.matches(".nav, .nav a, .nav button, .hero-name, .role-line")) {
-            markRectBorder(rect, "#");
-          }
+          words.push(...collectWordsFromElement(element, rect));
+        });
 
-          markTextTerrain(element, rect);
+        wordLayout = chooseObstacleWords(words);
+        wordLayout.forEach((word) => {
+          if (word.obstacle) markWordCells(word);
         });
       };
 
@@ -353,6 +468,22 @@
         ctx.restore();
       };
 
+      const drawWords = () => {
+        const obstacleColor = css("--ink", "#241407");
+        const fadedColor = "rgba(36, 20, 7, 0.26)";
+
+        wordLayout.forEach((word) => {
+          ctx.save();
+          ctx.font = word.obstacle ? word.obstacleFont : word.font;
+          ctx.textAlign = "left";
+          ctx.textBaseline = "middle";
+          ctx.globalAlpha = word.obstacle ? 1 : 0.28;
+          ctx.fillStyle = word.obstacle ? obstacleColor : fadedColor;
+          ctx.fillText(word.text, Math.round(word.left), Math.round(word.centerY));
+          ctx.restore();
+        });
+      };
+
       const draw = () => {
         if (!metrics) return;
 
@@ -362,6 +493,8 @@
         const foodColor = css("--accent", "#e86f00");
         const snakeHead = "#083f35";
         const snakeBody = "#126d5c";
+
+        drawWords();
 
         for (let x = 0; x < metrics.cols; x += 1) {
           drawCell({ x, y: 0 }, "#", terrainColor);
@@ -460,10 +593,63 @@
         food = randomFreeCell();
         dir = start.direction;
         queuedDir = start.direction;
+        advanceRemainder = 0;
         score = 0;
         tickMs = 122;
         updateReadout();
         draw();
+      };
+
+      const renderGameToText = () => {
+        const obstacleWords = wordLayout
+          .filter((word) => word.obstacle)
+          .map((word) => ({
+            text: word.text,
+            bounds: {
+              bottom: Math.round(word.bottom),
+              left: Math.round(word.left),
+              right: Math.round(word.right),
+              top: Math.round(word.top)
+            }
+          }));
+        const fadedWordCount = wordLayout.length - obstacleWords.length;
+
+        return JSON.stringify({
+          coordinateSystem: "Grid origin is top-left. x increases right, y increases down. Word bounds are viewport pixels.",
+          mode: restoring ? "crashed" : active ? "playing" : "idle",
+          score,
+          best,
+          grid: metrics
+            ? {
+                cellHeight: metrics.cellHeight,
+                cellWidth: metrics.cellWidth,
+                cols: metrics.cols,
+                rows: metrics.rows
+              }
+            : null,
+          snake,
+          food,
+          direction: dir,
+          obstacleWordCount: obstacleWords.length,
+          fadedWordCount,
+          obstacleWords
+        });
+      };
+
+      window.render_game_to_text = renderGameToText;
+      window.advanceTime = (ms = tickMs) => {
+        if (!active) return renderGameToText();
+
+        const steps = Math.max(1, Math.round(Number(ms) / tickMs));
+        advanceRemainder += Math.max(0, Number(ms) || 0);
+
+        for (let index = 0; index < steps && running && advanceRemainder >= tickMs; index += 1) {
+          step();
+          advanceRemainder -= tickMs;
+        }
+
+        draw();
+        return renderGameToText();
       };
 
       const startGame = () => {

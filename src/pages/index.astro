@@ -2,6 +2,8 @@
 import "../styles/global.css";
 import SiteCursor from "../components/SiteCursor.astro";
 import SiteSnake from "../components/SiteSnake.astro";
+import SiteTheme from "../components/SiteTheme.astro";
+import ThemePicker from "../components/ThemePicker.astro";
 
 const canonicalUrl = "https://ritwic.com/";
 const siteDescription =
@@ -132,6 +134,7 @@ const personJsonLd = {
     <link rel="sitemap" type="application/xml" href="/sitemap.xml" />
     <link rel="alternate" type="text/plain" href="/llms.txt" title="LLM-readable site summary" />
     <link rel="alternate" type="text/plain" href="/agents.txt" title="Agent guidance for ritwic.com" />
+    <SiteTheme />
     <script type="application/ld+json" set:html={JSON.stringify(personJsonLd)} />
   </head>
   <body>
@@ -144,6 +147,7 @@ const personJsonLd = {
           <nav class="nav" aria-label="Primary links">
             {links.map((link) => <a href={link.href} target="_blank" rel="noopener noreferrer"><span class="link-text">{link.label}</span></a>)}
             <button id="site-snake-launch" type="button" aria-label="Play snake on this page">snake</button>
+            <ThemePicker />
           </nav>
         </header>
 

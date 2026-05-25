@@ -1,0 +1,53 @@
+---
+import { siteThemes } from "../data/siteThemes";
+---
+
+<script define:vars={{ siteThemes }}>
+  (() => {
+    const themes = Array.isArray(siteThemes) ? siteThemes : [];
+    if (!themes.length) return;
+
+    const root = document.documentElement;
+    const metaTheme = document.querySelector('meta[name="theme-color"]');
+    const selectId = "theme-select";
+
+    const applyTheme = (theme) => {
+      Object.entries(theme.vars).forEach(([name, value]) => {
+        root.style.setProperty(name, value);
+      });
+
+      root.dataset.theme = theme.id;
+
+      if (metaTheme instanceof HTMLMetaElement) {
+        metaTheme.content = theme.meta;
+      }
+
+      const select = document.getElementById(selectId);
+      if (select instanceof HTMLSelectElement) {
+        select.value = theme.id;
+      }
+    };
+
+    const randomTheme = themes[Math.floor(Math.random() * themes.length)];
+    applyTheme(randomTheme);
+
+    const bindPicker = () => {
+      const select = document.getElementById(selectId);
+      if (!(select instanceof HTMLSelectElement)) return;
+
+      select.value = root.dataset.theme || randomTheme.id;
+      select.addEventListener("change", () => {
+        const nextTheme = themes.find((theme) => theme.id === select.value);
+        if (nextTheme) applyTheme(nextTheme);
+      });
+    };
+
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", bindPicker, { once: true });
+    } else {
+      bindPicker();
+    }
+
+    window.siteThemes = { applyTheme, themes };
+  })();
+</script>

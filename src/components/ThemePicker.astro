@@ -1,0 +1,10 @@
+---
+import { siteThemes } from "../data/siteThemes";
+---
+
+<label class="theme-picker" for="theme-select" aria-label="Theme color">
+  <span class="theme-swatch" aria-hidden="true"></span>
+  <select id="theme-select" name="theme" aria-label="Theme color">
+    {siteThemes.map((theme) => <option value={theme.id}>{theme.label}</option>)}
+  </select>
+</label>

@@ -7,7 +7,7 @@
     const siteCursor = document.getElementById("site-cursor");
     if (!siteCursor) return;
 
-    const interactiveSelector = "a[href], button, [role='button'], [tabindex]:not([tabindex='-1'])";
+    const interactiveSelector = "a[href], button, select, input, textarea, [role='button'], [tabindex]:not([tabindex='-1'])";
 
     const setCursorMode = (target) => {
       const interactive = target instanceof Element ? target.closest(interactiveSelector) : null;

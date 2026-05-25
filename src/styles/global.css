@@ -278,7 +278,8 @@ img {
 }
 
 .nav a,
-.nav button {
+.nav button,
+.theme-picker {
   border: 2px solid var(--brutal-stroke);
   border-radius: 0;
   color: var(--brutal-face-ink);
@@ -290,12 +291,14 @@ img {
   transition:
     color 140ms ease,
     background 140ms ease,
+    border-color 140ms ease,
     box-shadow 140ms ease,
     transform 140ms ease;
 }
 
 .nav a:hover,
-.nav button:hover {
+.nav button:hover,
+.theme-picker:hover {
   color: var(--brutal-face-ink);
   background:
     linear-gradient(180deg, rgba(255, 255, 255, 0.2), transparent 52%),
@@ -305,7 +308,8 @@ img {
 }
 
 .nav a,
-.nav button {
+.nav button,
+.theme-picker {
   display: inline-flex;
   align-items: center;
   min-height: 26px;
@@ -317,7 +321,8 @@ img {
 }
 
 .nav a,
-.nav button {
+.nav button,
+.theme-picker {
   color: var(--brutal-face-ink);
 }
 
@@ -327,6 +332,55 @@ img {
 
 .nav button {
   appearance: none;
+}
+
+.theme-picker {
+  position: relative;
+  justify-content: center;
+  width: 34px;
+  padding: 0;
+  overflow: hidden;
+}
+
+.theme-picker:focus-within {
+  outline: 1px solid var(--accent);
+  outline-offset: 4px;
+}
+
+.theme-picker::after {
+  display: none;
+}
+
+.theme-swatch {
+  width: 14px;
+  height: 14px;
+  border: 2px solid currentColor;
+  background: var(--accent);
+  box-shadow: 1px 1px 0 var(--brutal-stroke);
+  transition:
+    background 140ms ease,
+    transform 140ms ease;
+}
+
+.theme-picker:hover .theme-swatch {
+  transform: rotate(-8deg) scale(1.08);
+}
+
+.theme-picker select {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  padding: 0;
+  color: inherit;
+  appearance: none;
+  background: transparent;
+  font: inherit;
+  font-weight: 700;
+  line-height: 1;
+  opacity: 0;
+  outline: none;
 }
 
 .content-grid {
@@ -618,10 +672,16 @@ body.snake-mode #site-snake-launch {
   }
 
   .nav a,
-  .nav button {
+  .nav button,
+  .theme-picker {
     min-height: 24px;
     padding: 0 6px;
     font-size: 0.84rem;
+  }
+
+  .theme-picker {
+    width: 30px;
+    padding: 0;
   }
 
   .summary-list {
@@ -784,7 +844,8 @@ body.snake-mode #site-snake-launch {
 @media (pointer: fine) {
   body,
   a,
-  button {
+  button,
+  select {
     cursor: none;
   }
 
